@@ -5,7 +5,7 @@ buildscript {
     }
     dependencies {
         // STUFF FOR BINTRAY
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.24.14"
     }
 }
 
@@ -15,22 +15,8 @@ allprojects {
     apply plugin: 'maven'
     apply plugin: 'project-report'
 
-    task sourcesJar(type: Jar, dependsOn: classes) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    task javadocJar(type: Jar, dependsOn: classes) {
-        classifier = 'javadoc'
-        from javadoc
-    }
-
     javadoc {
         failOnError = false
-    }
-
-    artifacts {
-        archives sourcesJar, javadocJar
     }
 
     repositories {
@@ -64,13 +50,10 @@ allprojects {
 
 // Disable jar, sourcesJar, and javadoc tasks for the root project - we only want them to run for submodules
 jar.enabled = false
-sourcesJar.enabled = false
-javadocJar.enabled = false
 
 // No javadoc for sample or testonly modules.
 configure(subprojects.findAll { it.name.startsWith("sample") || it.name.startsWith("testonly") }) {
     javadoc.enabled = false
-    javadocJar.enabled = false
 }
 
 // ========== PROPERTIES FOR GRADLE BUILD - DEPENDENCY VERSIONS / ETC
@@ -139,11 +122,6 @@ ext {
         // For this repo we'll include everything that's not a sample or testonly module.
         return !subProj.name.startsWith("sample") && !subProj.getName().startsWith("testonly")
     }
-
-    // BINTRAY STUFF
-    bintrayUser = project.hasProperty('bintrayUser') ? property('bintrayUser') : 'UNDEFINED'
-    bintrayKey = project.hasProperty('bintrayKey') ? property('bintrayKey') : 'UNDEFINED'
-    bintrayVersion = "$version"
 }
 
 // ========== COMBO TEST REPORT - View the combined/merged report at: [project_root]/build/reports/tests/index.html
